@@ -43,7 +43,7 @@ export async function getVoterFromSession() {
     .single()
 
   if (error || !data) return null
-  return data as { id: string; name: string; location: string; session_token: string }
+  return data as { id: number; name: string; location: string; session_token: string }
 }
 
 export function generateSessionToken(): string {

@@ -9,10 +9,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { photoId, photoFilename, direction } = await request.json()
+    const { photoFilename, direction } = await request.json()
 
-    if (!photoId || typeof photoId !== "string") {
-      return NextResponse.json({ error: "photoId required" }, { status: 400 })
+    if (!photoFilename || typeof photoFilename !== "string") {
+      return NextResponse.json({ error: "photoFilename required" }, { status: 400 })
     }
     if (direction !== 1 && direction !== -1) {
       return NextResponse.json({ error: "direction must be 1 or -1" }, { status: 400 })
@@ -20,14 +20,14 @@ export async function POST(request: NextRequest) {
 
     const supabase = createAdminClient()
 
+    // Use photo_filename as the unique key (matches DB schema)
     const { error } = await supabase.from("votes").upsert(
       {
         voter_id: voter.id,
-        photo_id: photoId,
-        photo_filename: photoFilename || "",
+        photo_filename: photoFilename,
         direction,
       },
-      { onConflict: "voter_id,photo_id" }
+      { onConflict: "voter_id,photo_filename" }
     )
 
     if (error) throw error
@@ -46,10 +46,10 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { photoId } = await request.json()
+    const { photoFilename } = await request.json()
 
-    if (!photoId) {
-      return NextResponse.json({ error: "photoId required" }, { status: 400 })
+    if (!photoFilename) {
+      return NextResponse.json({ error: "photoFilename required" }, { status: 400 })
     }
 
     const supabase = createAdminClient()
@@ -58,7 +58,7 @@ export async function DELETE(request: NextRequest) {
       .from("votes")
       .delete()
       .eq("voter_id", voter.id)
-      .eq("photo_id", photoId)
+      .eq("photo_filename", photoFilename)
 
     if (error) throw error
 

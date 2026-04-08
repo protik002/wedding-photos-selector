@@ -14,14 +14,15 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from("votes")
-      .select("photo_id")
+      .select("photo_filename")
       .eq("voter_id", voter.id)
 
     if (error) throw error
 
-    const votedPhotoIds = (data || []).map((v) => v.photo_id)
+    // Return filenames instead of IDs (DB uses photo_filename)
+    const votedPhotoFilenames = (data || []).map((v) => v.photo_filename)
 
-    return NextResponse.json({ votedPhotoIds })
+    return NextResponse.json({ votedPhotoFilenames })
   } catch (err) {
     console.error("Votes fetch error:", err)
     return NextResponse.json({ error: "Server error" }, { status: 500 })

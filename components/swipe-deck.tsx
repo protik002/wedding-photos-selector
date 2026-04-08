@@ -15,13 +15,13 @@ interface Photo {
 }
 
 interface VoteHistoryEntry {
-  photoId: string
+  photoFilename: string
   direction: 1 | -1
 }
 
 export function SwipeDeck() {
   const [photos, setPhotos] = useState<Photo[]>([])
-  const [votedIds, setVotedIds] = useState<Set<string>>(new Set())
+  const [votedFilenames, setVotedFilenames] = useState<Set<string>>(new Set())
   const [currentIndex, setCurrentIndex] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -39,7 +39,7 @@ export function SwipeDeck() {
         const res = await fetch("/api/votes")
         if (res.ok) {
           const data = await res.json()
-          setVotedIds(new Set(data.votedPhotoIds || []))
+          setVotedFilenames(new Set(data.votedPhotoFilenames || []))
         }
       } catch {
         // Continue without previous votes
@@ -93,7 +93,7 @@ export function SwipeDeck() {
       img.src = photo.thumbnailUrl
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex, photos.length, votedIds.size])
+  }, [currentIndex, photos.length, votedFilenames.size])
 
   // Load more photos when running low
   useEffect(() => {
@@ -108,16 +108,16 @@ export function SwipeDeck() {
       loadPhotos(nextPageTokenRef.current).finally(() => setLoadingMore(false))
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex, votedIds.size])
+  }, [currentIndex, votedFilenames.size])
 
   function getUnvotedPhotos() {
-    return photos.filter((p, i) => i >= currentIndex && !votedIds.has(p.id))
+    return photos.filter((p, i) => i >= currentIndex && !votedFilenames.has(p.name))
   }
 
   // Find the next unvoted index from the current position
   function findNextUnvotedIndex(fromIndex: number): number {
     let idx = fromIndex
-    while (idx < photos.length && votedIds.has(photos[idx].id)) {
+    while (idx < photos.length && votedFilenames.has(photos[idx].name)) {
       idx++
     }
     return idx
@@ -130,8 +130,8 @@ export function SwipeDeck() {
     const photo = unvoted[0]
 
     // Optimistic update
-    setVotedIds((prev) => new Set(prev).add(photo.id))
-    setVoteHistory((prev) => [...prev, { photoId: photo.id, direction }])
+    setVotedFilenames((prev) => new Set(prev).add(photo.name))
+    setVoteHistory((prev) => [...prev, { photoFilename: photo.name, direction }])
     setCurrentIndex((prev) => findNextUnvotedIndex(prev))
 
     // Submit to server
@@ -140,16 +140,15 @@ export function SwipeDeck() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          photoId: photo.id,
           photoFilename: photo.name,
           direction,
         }),
       })
     } catch {
       // Revert on error
-      setVotedIds((prev) => {
+      setVotedFilenames((prev) => {
         const next = new Set(prev)
-        next.delete(photo.id)
+        next.delete(photo.name)
         return next
       })
       setVoteHistory((prev) => prev.slice(0, -1))
@@ -161,14 +160,14 @@ export function SwipeDeck() {
     const last = voteHistory[voteHistory.length - 1]
 
     setVoteHistory((prev) => prev.slice(0, -1))
-    setVotedIds((prev) => {
+    setVotedFilenames((prev) => {
       const next = new Set(prev)
-      next.delete(last.photoId)
+      next.delete(last.photoFilename)
       return next
     })
 
     // Find the index of this photo and go back
-    const idx = photos.findIndex((p) => p.id === last.photoId)
+    const idx = photos.findIndex((p) => p.name === last.photoFilename)
     if (idx >= 0 && idx < currentIndex) {
       setCurrentIndex(idx)
     }
@@ -177,7 +176,7 @@ export function SwipeDeck() {
       await fetch("/api/vote", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ photoId: last.photoId }),
+        body: JSON.stringify({ photoFilename: last.photoFilename }),
       })
     } catch {
       // Silent fail on undo
@@ -201,10 +200,10 @@ export function SwipeDeck() {
     window.addEventListener("keydown", handleKey)
     return () => window.removeEventListener("keydown", handleKey)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [voteHistory.length, previewPhoto, photos.length, votedIds.size, currentIndex])
+  }, [voteHistory.length, previewPhoto, photos.length, votedFilenames.size, currentIndex])
 
   const totalPhotos = photos.length + (allLoadedRef.current ? 0 : 50) // Estimate
-  const votedCount = votedIds.size
+  const votedCount = votedFilenames.size
   const progressPct = totalPhotos > 0 ? Math.min((votedCount / totalPhotos) * 100, 100) : 0
   const unvoted = getUnvotedPhotos()
   const isDone = unvoted.length === 0 && allLoadedRef.current && !loading
