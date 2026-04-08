@@ -39,6 +39,11 @@ export function LoginForm() {
         return
       }
 
+      // Store session token for API calls (needed for iframe preview compatibility)
+      if (data.sessionToken) {
+        sessionStorage.setItem("wedding_session", data.sessionToken)
+      }
+
       router.push("/swipe")
     } catch {
       setError("Connection error. Please try again.")

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { NavBar } from "@/components/nav-bar"
 import { SwipeDeck } from "@/components/swipe-deck"
+import { authFetch } from "@/lib/auth-fetch"
 
 export default function SwipePage() {
   const router = useRouter()
@@ -13,7 +14,7 @@ export default function SwipePage() {
   useEffect(() => {
     async function checkSession() {
       try {
-        const res = await fetch("/api/auth/me")
+        const res = await authFetch("/api/auth/me")
         if (!res.ok) {
           router.push("/")
           return

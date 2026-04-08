@@ -1,34 +1,19 @@
-import { cookies } from "next/headers"
+import { cookies, headers } from "next/headers"
 import { createAdminClient } from "@/lib/supabase/admin"
 
 const SESSION_COOKIE = "wedding_session"
-const SESSION_MAX_AGE = 60 * 60 * 24 * 30 // 30 days
-
-export async function setSessionCookie(token: string) {
-  const cookieStore = await cookies()
-  cookieStore.set(SESSION_COOKIE, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: SESSION_MAX_AGE,
-    path: "/",
-  })
-}
 
 export async function getSessionToken(): Promise<string | null> {
+  // First check Authorization header (for iframe preview compatibility)
+  const headerStore = await headers()
+  const authHeader = headerStore.get("authorization")
+  if (authHeader?.startsWith("Bearer ")) {
+    return authHeader.slice(7)
+  }
+  
+  // Fallback to cookie (for production)
   const cookieStore = await cookies()
   return cookieStore.get(SESSION_COOKIE)?.value ?? null
-}
-
-export async function clearSessionCookie() {
-  const cookieStore = await cookies()
-  cookieStore.set(SESSION_COOKIE, "", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 0,
-    path: "/",
-  })
 }
 
 export async function getVoterFromSession() {

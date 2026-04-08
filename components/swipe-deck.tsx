@@ -6,6 +6,7 @@ import { SwipeCard } from "@/components/swipe-card"
 import { PhotoViewer } from "@/components/photo-viewer"
 import { Button } from "@/components/ui/button"
 import { X, Heart, Undo2, Camera } from "lucide-react"
+import { authFetch } from "@/lib/auth-fetch"
 
 interface Photo {
   id: string
@@ -36,7 +37,7 @@ export function SwipeDeck() {
   useEffect(() => {
     async function loadVotes() {
       try {
-        const res = await fetch("/api/votes")
+        const res = await authFetch("/api/votes")
         if (res.ok) {
           const data = await res.json()
           setVotedFilenames(new Set(data.votedPhotoFilenames || []))
@@ -54,7 +55,7 @@ export function SwipeDeck() {
       const url = pageToken
         ? `/api/photos?pageToken=${pageToken}`
         : "/api/photos"
-      const res = await fetch(url)
+      const res = await authFetch(url)
       if (!res.ok) {
         const data = await res.json()
         throw new Error(data.error || "Failed to load photos")
@@ -136,7 +137,7 @@ export function SwipeDeck() {
 
     // Submit to server
     try {
-      await fetch("/api/vote", {
+      await authFetch("/api/vote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -173,7 +174,7 @@ export function SwipeDeck() {
     }
 
     try {
-      await fetch("/api/vote", {
+      await authFetch("/api/vote", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ photoFilename: last.photoFilename }),
