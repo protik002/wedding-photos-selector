@@ -276,10 +276,12 @@ export function SwipeDeck() {
       ) : (
         <>
           {/* Card stack */}
-          <div className="relative w-full max-w-sm flex-1 min-h-0 px-4 py-2">
-            <div className="relative h-full">
+          <div className="relative w-full max-w-sm flex-1 min-h-[400px] px-4 py-2">
+            <div className="relative h-full w-full">
               <AnimatePresence>
-                {unvoted.slice(0, 3).map((photo, i) => (
+                {unvoted.slice(0, 3).map((photo, i) => {
+                  console.log("[v0] Rendering photo:", photo.name, photo.thumbnailUrl)
+                  return (
                   <SwipeCard
                     key={photo.id}
                     photo={photo}
@@ -291,7 +293,7 @@ export function SwipeDeck() {
                     isTop={i === 0}
                     stackIndex={i}
                   />
-                ))}
+                )})}
               </AnimatePresence>
             </div>
           </div>
