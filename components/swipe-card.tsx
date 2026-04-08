@@ -19,6 +19,15 @@ export function SwipeCard({ photo, onSwipe, onTap, isTop, stackIndex }: SwipeCar
   const [imageLoaded, setImageLoaded] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
 
+  // Debug: Log image state
+  console.log("[v0] SwipeCard render:", { 
+    name: photo.name, 
+    thumbnailUrl: photo.thumbnailUrl?.slice(0, 60) + "...",
+    isTop, 
+    stackIndex,
+    imageLoaded 
+  })
+
   const scale = 1 - stackIndex * 0.04
   const yOffset = stackIndex * 8
 
@@ -70,8 +79,12 @@ export function SwipeCard({ photo, onSwipe, onTap, isTop, stackIndex }: SwipeCar
           src={photo.thumbnailUrl}
           alt={photo.name}
           className="h-full w-full object-cover"
-          onLoad={() => setImageLoaded(true)}
+          onLoad={() => {
+            console.log("[v0] Image LOADED:", photo.name)
+            setImageLoaded(true)
+          }}
           onError={(e) => {
+            console.log("[v0] Image ERROR:", photo.name, photo.thumbnailUrl)
             // Fallback if thumbnailLink fails - try uc?export=view
             const target = e.target as HTMLImageElement
             if (!target.src.includes("uc?export=view")) {

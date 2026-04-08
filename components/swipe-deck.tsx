@@ -275,8 +275,8 @@ export function SwipeDeck() {
         </div>
       ) : (
         <>
-          {/* Card stack */}
-          <div className="relative w-full max-w-sm flex-1 min-h-[400px] px-4 py-2">
+          {/* Card stack - explicit height needed for absolute positioned children */}
+          <div className="relative w-full max-w-sm px-4 py-2" style={{ height: "60vh", minHeight: "400px" }}>
             <div className="relative h-full w-full">
               <AnimatePresence>
                 {unvoted.slice(0, 3).map((photo, i) => {
