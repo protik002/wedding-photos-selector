@@ -93,16 +93,25 @@ export async function GET(request: Request) {
       }, { status: 500 })
     }
     
+    log(`[DEBUG] GOOGLE_API_KEY starts with: ${GOOGLE_API_KEY.substring(0, 10)}...`)
+    log(`[DEBUG] GOOGLE_DRIVE_FOLDER_ID: ${GOOGLE_DRIVE_FOLDER_ID}`)
+    
     const photosUrl = `https://www.googleapis.com/drive/v3/files?q='${GOOGLE_DRIVE_FOLDER_ID}'+in+parents+and+mimeType+contains+'image/'&key=${GOOGLE_API_KEY}&fields=files(id,name,mimeType,thumbnailLink)&pageSize=50`
+    
+    log(`[DEBUG] Fetching: ${photosUrl.replace(GOOGLE_API_KEY, 'KEY_HIDDEN')}`)
     
     const photosRes = await fetch(photosUrl)
     const photosData = await photosRes.json()
     
+    log(`[DEBUG] Google API response status: ${photosRes.status}`)
+    
     if (!photosRes.ok) {
       log(`[PHOTOS ERROR] Google Drive API error: ${JSON.stringify(photosData.error || photosData)}`)
+      log(`[PHOTOS ERROR] Full response: ${JSON.stringify(photosData)}`)
       return NextResponse.json({ 
         error: "Google Drive API error", 
         details: photosData.error || photosData,
+        googleApiStatus: photosRes.status,
         logs 
       }, { status: 500 })
     }
