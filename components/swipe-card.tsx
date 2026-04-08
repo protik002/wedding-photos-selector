@@ -70,9 +70,16 @@ export function SwipeCard({ photo, onSwipe, onTap, isTop, stackIndex }: SwipeCar
           src={photo.thumbnailUrl}
           alt={photo.name}
           className="h-full w-full object-cover"
-          crossOrigin="anonymous"
           onLoad={() => setImageLoaded(true)}
+          onError={(e) => {
+            // Fallback if thumbnailLink fails - try uc?export=view
+            const target = e.target as HTMLImageElement
+            if (!target.src.includes("uc?export=view")) {
+              target.src = `https://drive.google.com/uc?export=view&id=${photo.id}`
+            }
+          }}
           draggable={false}
+          referrerPolicy="no-referrer"
         />
 
         {/* Filename label */}

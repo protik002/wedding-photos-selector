@@ -41,10 +41,14 @@ export async function GET(request: NextRequest) {
       (f: { id: string; name: string; thumbnailLink?: string }) => ({
         id: f.id,
         name: f.name,
+        // Use lh3.googleusercontent.com URL if available (more reliable for embedding)
+        // Otherwise fall back to drive.google.com/uc which works for publicly shared files
         thumbnailUrl: f.thumbnailLink
           ? f.thumbnailLink.replace(/=s\d+/, "=s800")
-          : `https://drive.google.com/thumbnail?id=${f.id}&sz=w800`,
-        fullUrl: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1200`,
+          : `https://drive.google.com/uc?export=view&id=${f.id}`,
+        fullUrl: f.thumbnailLink
+          ? f.thumbnailLink.replace(/=s\d+/, "=s1600")
+          : `https://drive.google.com/uc?export=view&id=${f.id}`,
       })
     )
 
