@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
+import { cookies } from "next/headers"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { setSessionCookie, generateSessionToken } from "@/lib/session"
+import { generateSessionToken } from "@/lib/session"
+
+const SESSION_COOKIE = "wedding_session"
+const SESSION_MAX_AGE = 60 * 60 * 24 * 30 // 30 days
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,8 +54,15 @@ export async function POST(request: NextRequest) {
 
     if (updateError) throw updateError
 
-    // Set httpOnly cookie
-    await setSessionCookie(sessionToken)
+    // Set httpOnly cookie using cookies() API
+    const cookieStore = await cookies()
+    cookieStore.set(SESSION_COOKIE, sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: SESSION_MAX_AGE,
+      path: "/",
+    })
 
     return NextResponse.json({
       voter: { id: voter.id, name: voter.name, location: voter.location },
