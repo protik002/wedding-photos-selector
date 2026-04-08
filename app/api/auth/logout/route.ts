@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
-import { clearSessionCookie } from "@/lib/session"
 
 export async function POST() {
-  await clearSessionCookie()
+  // Session is now managed client-side via sessionStorage
+  // Server just acknowledges the logout request
   return NextResponse.json({ success: true })
 }
