@@ -1,4 +1,4 @@
-import { cookies, headers } from "next/headers"
+import { headers } from "next/headers"
 import { createAdminClient } from "@/lib/supabase/admin"
 
 const SESSION_COOKIE = "wedding_session"
