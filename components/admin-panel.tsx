@@ -15,6 +15,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { ShieldAlert, Trash2 } from "lucide-react"
+import { authFetch } from "@/lib/auth-fetch"
 
 export function AdminPanel({ onReset }: { onReset: () => void }) {
   const [open, setOpen] = useState(false)
@@ -33,7 +34,7 @@ export function AdminPanel({ onReset }: { onReset: () => void }) {
     setError("")
 
     try {
-      const res = await fetch("/api/admin/reset", {
+      const res = await authFetch("/api/admin/reset", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ adminPassword: password }),

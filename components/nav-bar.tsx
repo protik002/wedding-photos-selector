@@ -5,13 +5,15 @@ import { usePathname, useRouter } from "next/navigation"
 import { Heart, BarChart3, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { authFetch, clearSession } from "@/lib/auth-fetch"
 
 export function NavBar({ voterName }: { voterName?: string }) {
   const pathname = usePathname()
   const router = useRouter()
 
   async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" })
+    await authFetch("/api/auth/logout", { method: "POST" })
+    clearSession()
     router.push("/")
   }
 

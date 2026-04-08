@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { NavBar } from "@/components/nav-bar"
 import { ResultsTable } from "@/components/results-table"
 import { AdminPanel } from "@/components/admin-panel"
+import { authFetch } from "@/lib/auth-fetch"
 
 interface PhotoResult {
   id: string
@@ -22,7 +23,7 @@ export default function ResultsPage() {
 
   const loadResults = useCallback(async () => {
     try {
-      const res = await fetch("/api/results")
+      const res = await authFetch("/api/results")
       if (res.ok) {
         const data = await res.json()
         setResults(data.results || [])
@@ -35,7 +36,7 @@ export default function ResultsPage() {
   useEffect(() => {
     async function init() {
       try {
-        const authRes = await fetch("/api/auth/me")
+        const authRes = await authFetch("/api/auth/me")
         if (!authRes.ok) {
           router.push("/")
           return
