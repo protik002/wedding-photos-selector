@@ -13,29 +13,28 @@ export async function GET() {
 
     const { data: votes, error } = await supabase
       .from("votes")
-      .select("photo_id, photo_filename, direction")
+      .select("photo_filename, direction")
 
     if (error) throw error
 
-    // Aggregate by photo
+    // Aggregate by photo filename
     const photoMap: Record<
       string,
-      { id: string; filename: string; score: number; totalVotes: number; keeps: number }
+      { filename: string; score: number; totalVotes: number; keeps: number }
     > = {}
 
     for (const v of votes || []) {
-      if (!photoMap[v.photo_id]) {
-        photoMap[v.photo_id] = {
-          id: v.photo_id,
+      if (!photoMap[v.photo_filename]) {
+        photoMap[v.photo_filename] = {
           filename: v.photo_filename,
           score: 0,
           totalVotes: 0,
           keeps: 0,
         }
       }
-      photoMap[v.photo_id].score += v.direction
-      photoMap[v.photo_id].totalVotes++
-      if (v.direction === 1) photoMap[v.photo_id].keeps++
+      photoMap[v.photo_filename].score += v.direction
+      photoMap[v.photo_filename].totalVotes++
+      if (v.direction === 1) photoMap[v.photo_filename].keeps++
     }
 
     const results = Object.values(photoMap)
