@@ -2,12 +2,13 @@
 ALTER TABLE voters ADD COLUMN IF NOT EXISTS session_token text UNIQUE;
 
 -- Add unique constraint on votes to prevent duplicate votes
+-- NOTE: the app keys votes by (voter_id, photo_filename), matching the votes table schema.
 DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_constraint WHERE conname = 'votes_voter_photo_unique'
   ) THEN
-    ALTER TABLE votes ADD CONSTRAINT votes_voter_photo_unique UNIQUE (voter_id, photo_id);
+    ALTER TABLE votes ADD CONSTRAINT votes_voter_photo_unique UNIQUE (voter_id, photo_filename);
   END IF;
 END $$;
 
